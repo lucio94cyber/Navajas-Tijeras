@@ -42,7 +42,9 @@ tin:'<svg width="90" height="70" viewBox="0 0 90 70" fill="none"><rect x="10" y=
 bottle:'<svg width="50" height="92" viewBox="0 0 50 92" fill="none"><rect x="18" y="4" width="14" height="14" fill="#8a6a2f"/><rect x="8" y="18" width="34" height="68" rx="8" fill="#1f3a6e"/><rect x="14" y="40" width="22" height="22" fill="#f3f0ea"/></svg>',
 comb:'<svg width="100" height="50" viewBox="0 0 100 50" fill="none"><rect x="4" y="6" width="92" height="14" rx="5" fill="#8a6a2f"/><g fill="#8a6a2f"><rect x="10" y="20" width="4" height="22"/><rect x="22" y="20" width="4" height="22"/><rect x="34" y="20" width="4" height="22"/><rect x="46" y="20" width="4" height="22"/><rect x="58" y="20" width="4" height="22"/><rect x="70" y="20" width="4" height="22"/><rect x="82" y="20" width="4" height="22"/></g></svg>'};
 const svcSel=$("fs");
-$("services").innerHTML=SERVICES.map((s,i)=>`<div class="svc"><div><h3>${s[0]}</h3><small>${s[1]} · ${s[3]}</small></div><span class="price">${fmt(s[2])}</span><button class="btn" data-book="${i}">Reservar</button></div>`).join("");
+const SIMG=["images/servicios/corte-clasico.jpg", "images/servicios/corte-y-barba.jpg", "images/servicios/afeitado-con-navaja.jpg", "images/servicios/arreglo-de-barba.jpg", "images/servicios/corte-infantil.jpg", "images/servicios/coloracion-y-matiz.jpg"];
+const SPOS=["50% 30%", "50% 35%", "60% 40%", "50% 40%", "50% 25%", "50% 30%"];
+$("services").innerHTML=SERVICES.map((s,i)=>`<article class="svc"><img src="${SIMG[i]}" alt="${s[0]}" style="object-position:${SPOS[i]}" loading="lazy"><span class="price">${fmt(s[2])}</span><div class="svcTxt"><h3>${s[0]}</h3><p>${s[1]}</p><small>${s[3]}</small><button class="btn" data-book="${i}">Reservar</button></div></article>`).join("");
 svcSel.innerHTML=SERVICES.map((s,i)=>`<option value="${i}">${s[0]} (${fmt(s[2])})</option>`).join("");
 const cats=["Todos",...new Set(PRODUCTS.map(p=>p[1]))];
 let cat="Todos";const cart={};
@@ -57,7 +59,7 @@ const t=e.target.closest("button");if(!t)return;
 if(t.dataset.cat){cat=t.dataset.cat;drawTabs();drawGrid()}
 if(t.dataset.add){const i=t.dataset.add;cart[i]=(cart[i]||0)+1;drawCart();t.textContent="Agregado";t.classList.add("done");setTimeout(()=>{t.textContent="Agregar";t.classList.remove("done")},900)}
 if(t.dataset.q){const[i,d]=t.dataset.q.split(":");cart[i]+=+d;if(cart[i]<=0)delete cart[i];drawCart()}
-if(t.dataset.book!==undefined){if(t.dataset.book!=="")svcSel.value=t.dataset.book;$("bmsg").innerHTML="";$("dlg").showModal()}
+if(t.dataset.book!==undefined){if(t.dataset.book!=="")svcSel.value=t.dataset.book;$("bmsg").innerHTML="";renderBooking();$("dlg").showModal()}
 });
 $("openCart").onclick=()=>$("drawer").classList.add("open");
 $("closeCart").onclick=()=>$("drawer").classList.remove("open");
@@ -66,9 +68,26 @@ $("checkout").onclick=()=>{const ids=Object.keys(cart);if(!ids.length){$("cartms
 let tot=0;const l=ids.map(i=>{tot+=PRODUCTS[i][3]*cart[i];return "- "+cart[i]+" x "+PRODUCTS[i][0]+" ("+fmt(PRODUCTS[i][3]*cart[i])+")"});
 sendWA("Hola, quiero hacer este pedido:\n"+l.join("\n")+"\nTotal: "+fmt(tot),"cartmsg")};
 $("cancel").onclick=()=>$("dlg").close();
-$("confirm").onclick=()=>{const n=$("fn").value.trim(),d=$("fd").value;
-if(!n||!d){$("bmsg").innerHTML='<div class="ok">Completa tu nombre y el día para continuar.</div>';return}
-sendWA("Hola, quiero reservar un turno:\nServicio: "+SERVICES[svcSel.value][0]+"\nNombre: "+n+"\nDía y hora: "+new Date(d).toLocaleString("es-AR",{dateStyle:"medium",timeStyle:"short"}),"bmsg")};
+const HOURS={0:null,1:[9,20],2:[9,20],3:[9,20],4:[9,20],5:[9,20],6:[9,18]};/* [apertura, cierre] por día de la semana (0 = domingo, null = cerrado) */
+let selDay=null,selTime=null,dayList=[];
+const pad=n=>String(n).padStart(2,"0"),hm=m=>pad(Math.floor(m/60))+":"+pad(m%60);
+function slotsFor(d){const h=HOURS[d.getDay()];if(!h)return[];const du=parseInt(SERVICES[svcSel.value][3]),now=new Date(),isToday=d.toDateString()===now.toDateString(),nm=now.getHours()*60+now.getMinutes()+30,o=[];
+for(let m=h[0]*60;m+du<=h[1]*60;m+=30){if(isToday&&m<nm)continue;o.push(m)}return o}
+function renderSlots(){const box=$("slots");selTime=null;if(!selDay){box.innerHTML='<span class="slotnote">No hay horarios disponibles.</span>';return}
+const sl=slotsFor(selDay);box.innerHTML=sl.length?sl.map(m=>`<button type="button" class="chip" data-t="${m}" aria-pressed="false"><b>${hm(m)}</b></button>`).join(""):'<span class="slotnote">No quedan horarios para este día.</span>'}
+function renderBooking(){const now=new Date();dayList=[];
+for(let i=0;dayList.length<14&&i<40;i++){const d=new Date(now.getFullYear(),now.getMonth(),now.getDate()+i);if(slotsFor(d).length)dayList.push(d)}
+selDay=dayList[0]||null;
+const tn=now.toDateString(),tm=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1).toDateString();
+$("days").innerHTML=dayList.map((d,i)=>{const t=d.toDateString(),top=t===tn?"Hoy":t===tm?"Mañana":d.toLocaleDateString("es-AR",{weekday:"short"}).replace(".","");
+return `<button type="button" class="chip" data-d="${i}" aria-pressed="${i===0}"><small>${top}</small><b>${d.getDate()}</b><small>${d.toLocaleDateString("es-AR",{month:"short"}).replace(".","")}</small></button>`}).join("");
+renderSlots()}
+$("days").addEventListener("click",e=>{const b=e.target.closest("[data-d]");if(!b)return;selDay=dayList[+b.dataset.d];$("days").querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed",c===b));renderSlots()});
+$("slots").addEventListener("click",e=>{const b=e.target.closest("[data-t]");if(!b)return;selTime=+b.dataset.t;$("slots").querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed",c===b))});
+svcSel.onchange=renderBooking;
+$("confirm").onclick=()=>{const n=$("fn").value.trim();
+if(!n||!selDay||selTime===null){$("bmsg").innerHTML='<div class="ok">Escribe tu nombre y elige un día y un horario para continuar.</div>';return}
+sendWA("Hola, quiero reservar un turno:\nServicio: "+SERVICES[svcSel.value][0]+"\nNombre: "+n+"\nDía: "+selDay.toLocaleDateString("es-AR",{weekday:"long",day:"numeric",month:"long"})+"\nHorario: "+hm(selTime)+" hs","bmsg")};
 drawTabs();drawGrid();drawCart();
 
 /* ---------- Escena 3D ---------- */
@@ -121,4 +140,16 @@ orbit.rotation.x=.18;
 C.position.x+=(mx*1.6-C.position.x)*.05;C.position.y+=(-my*1.2+.3+sy*1.2-C.position.y)*.05;C.lookAt(0,0,0);
 R.render(S,C)}
 loop();
+})();
+
+/* ---------- Antes y después + video real (aparecen solo si existen los archivos) ---------- */
+(function(){
+const sec=document.getElementById("corte"),ba=document.getElementById("ba"),vid=document.getElementById("cutVideo"),nav=document.getElementById("navcorte");
+const show=el=>{el.hidden=false;sec.hidden=false;nav.hidden=false};
+const A=new Image(),B=new Image();let ok=0;
+const done=()=>{if(++ok===2){document.getElementById("baBefore").src=B.src;document.getElementById("baAfter").src=A.src;show(ba)}};
+B.onload=done;A.onload=done;B.src="images/antes.jpg";A.src="images/despues.jpg";
+document.getElementById("baRange").oninput=e=>ba.style.setProperty("--p",e.target.value+"%");
+vid.addEventListener("loadedmetadata",()=>show(vid));
+vid.src="images/corte.mp4#t=0.1";
 })();
