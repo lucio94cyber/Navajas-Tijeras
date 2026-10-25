@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Navajas y tijeras · Barbería y tienda</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rumble+Brave&family=DM+Sans:wght@400;500;700&display=swap">
+<link rel="icon" href="images/logo.jpg">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<nav><div class="wrap">
+<a class="logo" href="#"><img src="images/logo.jpg" alt="" width="52" height="52"><span>Navajas y tijeras</span></a>
+<a href="#servicios" class="hide">Servicios</a><a href="#tienda" class="hide">Tienda</a><a href="#visita" class="hide">Visítanos</a>
+<button class="cartbtn" id="openCart" aria-label="Abrir carrito">Carrito (<span id="count">0</span>)</button>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+<div>
+<h1>Corte clásico.<br>Tienda completa.</h1>
+<p>Reserva tu corte o arreglo de barba con nuestros barberos y llévate a casa las mismas máquinas, ceras y aceites que usamos en el sillón.</p>
+<div class="cta"><button class="btn" data-book="">Reservar turno</button><a class="btn alt" href="#tienda">Ver la tienda</a></div>
+</div>
+<div id="scene" aria-label="Poste de barbero en 3D con productos girando a su alrededor"></div>
+</div></header>
+
+<section id="servicios"><div class="wrap">
+<h2>Servicios</h2>
+<p class="sub">Todos incluyen toalla caliente y asesoría de peinado. Los turnos duran lo indicado.</p>
+<div class="services" id="services"></div>
+</div></section>
+
+<section id="tienda" style="background:var(--surface)"><div class="wrap">
+<h2>Tienda</h2>
+<p class="sub">Máquinas profesionales, ceras, aceites y accesorios. Elige una categoría y agrega al carrito.</p>
+<div class="tabs" id="tabs"></div>
+<div class="grid" id="grid"></div>
+</div></section>
+
+<section id="visita" class="visit"><div class="wrap">
+<h2>Visítanos</h2>
+<p class="sub">Atendemos con turno y sin turno, según disponibilidad. Retira tus compras en el local sin costo de envío.</p>
+<div class="hours"><div><strong>Lunes a viernes</strong><br>9:00 a 20:00</div><div><strong>Sábados</strong><br>9:00 a 18:00</div><div><strong>Domingos</strong><br>Cerrado</div></div>
+</div></section>
+<footer><img src="images/logo.jpg" alt="Logo Navajas y tijeras" width="120" height="120">© Navajas y tijeras. Todos los derechos reservados.</footer>
+
+<aside class="drawer" id="drawer" aria-label="Carrito de compras">
+<div style="display:flex;justify-content:space-between;align-items:center"><h2 style="font-size:2.2rem;margin:0">Tu carrito</h2><button class="qty" id="closeCart" aria-label="Cerrar carrito" style="border:0;background:none;color:inherit;font-size:1.6rem">×</button></div>
+<ul id="items"></ul>
+<div class="total"><span>Total</span><span id="total">$0</span></div>
+<button class="btn" id="checkout" style="width:100%">Pedir por WhatsApp</button>
+<div id="cartmsg"></div>
+</aside>
+
+<dialog id="dlg">
+<h2 style="font-size:2.2rem">Reservar turno</h2>
+<label for="fs">Servicio</label><select id="fs"></select>
+<label for="fn">Tu nombre</label><input id="fn" autocomplete="name">
+<label for="fd">Día y hora</label><input id="fd" type="datetime-local">
+<div style="display:flex;gap:10px;margin-top:18px"><button class="btn" id="confirm">Reservar por WhatsApp</button><button class="btn alt" id="cancel">Cancelar</button></div>
+<div id="bmsg"></div>
+</dialog>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
