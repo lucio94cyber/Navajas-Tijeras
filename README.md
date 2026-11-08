@@ -5,7 +5,7 @@ Una propuesta digital para barberías que buscan mostrar sus servicios, transmit
 
 ## 🌐 Proyecto web
 
-[**Explorar Proyecto →**](https://navajasytijeras.netlify.app/)
+[**Visitar Navajas y Tijeras →**](https://navajasytijeras.netlify.app/)
 
 ## ✨ Características
 
