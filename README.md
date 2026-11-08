@@ -5,7 +5,7 @@ Una propuesta digital para barberías que buscan mostrar sus servicios, transmit
 
 ## 🌐 Proyecto web
 
-[**Explorar repositorio →**](https://github.com/lucio94cyber/Navajas-Tijeras)
+[**Explorar Proyecto →**](https://navajasytijeras.netlify.app/)
 
 ## ✨ Características
 
